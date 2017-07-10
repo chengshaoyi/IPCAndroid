@@ -24,9 +24,14 @@ public class MyIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             //int[] msgData = intent.getIntArrayExtra("pixels");
-            Bundle b = intent.getExtras();
+            //Bundle b = intent.getExtras();
+            //ClassLoader cl = b.getClassLoader();
 
-            ResultReceiver replyReceiver = (ResultReceiver)(b.get("resultReceiver"));
+
+
+
+
+            ResultReceiver replyReceiver = intent.getParcelableExtra("resultReceiver");//(ResultReceiver)(b.getParcelable("resultReceiver"));
 
             Bundle reply = new Bundle();
             //reply.putIntArray("pixels",msgData);

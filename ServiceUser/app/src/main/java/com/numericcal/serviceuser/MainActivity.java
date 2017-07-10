@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
             serviceMessenger = new Messenger(service);
             mBound = true;
             Toast.makeText(getApplicationContext(),"user connected", Toast.LENGTH_SHORT).show();
+
         }
 
         @Override
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         // send stuff to the service
         Bundle msgData = new Bundle();
         msgData.putIntArray(pixelKey,dataToSend);
-        Message msg = Message.obtain(null, 1,0,0, null);//msgData);
+        Message msg = Message.obtain(null, 1,0,0, msgData);
         msg.replyTo = activityMessenger;
         msgTimeLog = System.currentTimeMillis();
 
@@ -92,31 +94,48 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             intServTimeLog = System.currentTimeMillis()-intServTimeLog;
-            Toast.makeText(getApplicationContext(),"data received from IntentService", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"data from IntentService", Toast.LENGTH_SHORT).show();
             View timeView = findViewById(R.id.intentTimeText);
             ((TextView)timeView).setText(""+(intServTimeLog /1.0f)+" ms");
         }
 
     }
-    //public MyResultReceiver activityResultReceiver = new MyResultReceiver(new Handler());
-    public ResultReceiver activityResultReceiver = new ResultReceiver(null)
+    public MyResultReceiver activityResultReceiver = new MyResultReceiver(new Handler());
+    /*public ResultReceiver activityResultReceiver = new ResultReceiver(null)
     {
+        @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             intServTimeLog = System.currentTimeMillis()-intServTimeLog;
             Toast.makeText(getApplicationContext(),"data received from IntentService", Toast.LENGTH_SHORT).show();
             View timeView = findViewById(R.id.intentTimeText);
             ((TextView)timeView).setText(""+(intServTimeLog /1.0f)+" ms");
         }
-    };
+    };*/
+
+    public static ResultReceiver receiverForSending(ResultReceiver actualReceiver) {
+        Parcel parcel = Parcel.obtain();
+        actualReceiver.writeToParcel(parcel,0);
+        parcel.setDataPosition(0);
+        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return receiverForSending;
+    }
+
     public void sendIntentButtonClicked(View view)
     {
         Intent getIntentService = new Intent();
         getIntentService.setComponent(new ComponentName("com.numericcal.serviceprovider","com.numericcal.serviceprovider.MyIntentService"));
+
         intServTimeLog = System.currentTimeMillis();
         Bundle intentBundle = new Bundle();
-        intentBundle.putIntArray(pixelKey,dataToSend);
-        intentBundle.putParcelable(rrKey,activityResultReceiver);
-        getIntentService.putExtras(intentBundle);
+
+        //intentBundle.putIntArray(pixelKey,dataToSend);
+        //intentBundle.putParcelable(rrKey,activityResultReceiver);
+
+        //getIntentService.putExtras(intentBundle);
+        //getIntentService.setExtrasClassLoader(getClassLoader());
+
+        getIntentService.putExtra(rrKey,receiverForSending(activityResultReceiver));
         startService(getIntentService);
     }
 
