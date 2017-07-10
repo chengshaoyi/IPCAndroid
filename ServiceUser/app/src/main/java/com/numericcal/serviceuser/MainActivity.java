@@ -6,16 +6,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.MemoryFile;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.numericcal.serviceprovider.ShmemInterface;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     private final String pixelKey= "pixels";
@@ -101,16 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public MyResultReceiver activityResultReceiver = new MyResultReceiver(new Handler());
-    /*public ResultReceiver activityResultReceiver = new ResultReceiver(null)
-    {
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            intServTimeLog = System.currentTimeMillis()-intServTimeLog;
-            Toast.makeText(getApplicationContext(),"data received from IntentService", Toast.LENGTH_SHORT).show();
-            View timeView = findViewById(R.id.intentTimeText);
-            ((TextView)timeView).setText(""+(intServTimeLog /1.0f)+" ms");
-        }
-    };*/
+
 
     public static ResultReceiver receiverForSending(ResultReceiver actualReceiver) {
         Parcel parcel = Parcel.obtain();
@@ -127,20 +125,68 @@ public class MainActivity extends AppCompatActivity {
         getIntentService.setComponent(new ComponentName("com.numericcal.serviceprovider","com.numericcal.serviceprovider.MyIntentService"));
 
         intServTimeLog = System.currentTimeMillis();
-        Bundle intentBundle = new Bundle();
 
-        //intentBundle.putIntArray(pixelKey,dataToSend);
-        //intentBundle.putParcelable(rrKey,activityResultReceiver);
-
-        //getIntentService.putExtras(intentBundle);
-        //getIntentService.setExtrasClassLoader(getClassLoader());
-
+        getIntentService.putExtra(pixelKey,dataToSend);
         getIntentService.putExtra(rrKey,receiverForSending(activityResultReceiver));
         startService(getIntentService);
     }
 
 
     //-------------- end of intentService based -----------------------//
+    ParcelFileDescriptor pfd;
+
+    static {
+        System.loadLibrary("native-lib");
+    }
+    public native void shmemInit(int fd, int numPages);
+    public native void shmemSend(int[] data);
+    public void sendShmemButtonClicked(View view)
+    {
+        shmemSend(dataToSend);
+    }
+
+    public void setupShmemButtonClicked(View view)
+    {
+        Intent bindIntent = new Intent();
+        bindIntent.setComponent(new ComponentName("com.numericcal.serviceprovider","com.numericcal.serviceprovider.SharedMemoryService"));
+        bindService(bindIntent,shmemConnection, Context.BIND_AUTO_CREATE);
+
+    }
+    ShmemInterface remoteShmem;
+    private ServiceConnection shmemConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            remoteShmem = ShmemInterface.Stub.asInterface(service);
+
+
+            try {
+                int numPages = numWord*4/4096+1;
+
+                pfd = remoteShmem.getFD("abc",numPages);
+                shmemInit(pfd.getFd(),numPages);
+                Toast.makeText(getApplicationContext(),"shmem connected "+numPages, Toast.LENGTH_SHORT).show();
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            remoteShmem = null;
+            Toast.makeText(getApplicationContext(),"shmem disconnected", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+
+
+
+
+
+
+
+
+    //------------- end of shared mem -------------------------------//
     private int[] dataToSend;
     private final int numWord = 160*120;
 
@@ -153,6 +199,8 @@ public class MainActivity extends AppCompatActivity {
         {
             dataToSend[i] = 1;
         }
+        // shared memory stuff
+
     }
     @Override
     public void onDestroy()

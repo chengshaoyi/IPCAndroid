@@ -20,8 +20,10 @@ public class MessengerService extends Service {
         {
             receivedData = msg.obj;
             int[] actualData = ((Bundle)receivedData).getIntArray("pixels");
+            Bundle response = new Bundle();
+            response.putIntArray("pixels",actualData);
             // compose a new message and send back
-            Message replyMsg = Message.obtain(null, 1,0,0,receivedData);
+            Message replyMsg = Message.obtain(null, 1,0,0,response);
             try {
                 msg.replyTo.send(replyMsg);
             } catch (RemoteException e) {

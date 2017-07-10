@@ -15,6 +15,8 @@ import android.os.ResultReceiver;
  */
 public class MyIntentService extends IntentService {
 
+    private final String pixelKey= "pixels";
+    private final String rrKey= "resultReceiver";
     public MyIntentService() {
         super("MyIntentService");
     }
@@ -23,7 +25,6 @@ public class MyIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            //int[] msgData = intent.getIntArrayExtra("pixels");
             //Bundle b = intent.getExtras();
             //ClassLoader cl = b.getClassLoader();
 
@@ -31,10 +32,11 @@ public class MyIntentService extends IntentService {
 
 
 
-            ResultReceiver replyReceiver = intent.getParcelableExtra("resultReceiver");//(ResultReceiver)(b.getParcelable("resultReceiver"));
+            ResultReceiver replyReceiver = intent.getParcelableExtra(rrKey);
+            int[] msgData = intent.getIntArrayExtra(pixelKey);
 
             Bundle reply = new Bundle();
-            //reply.putIntArray("pixels",msgData);
+            reply.putIntArray("pixels",msgData);
             replyReceiver.send(0,reply);
 
         }

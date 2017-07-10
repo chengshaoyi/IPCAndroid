@@ -13,53 +13,53 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Message Service"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message Service"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-        <Button
-            android:id="@+id/connectMsgButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="connect service"
-            android:onClick="connectMsgButtonClicked"/>
-        <Button
-            android:id="@+id/msgCallButton"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <Button
+                android:id="@+id/connectMsgButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="connect service"
+                android:onClick="connectMsgButtonClicked"/>
+            <Button
+                android:id="@+id/msgCallButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send Data"
+                android:onClick="sendMsgButtonClicked"/>
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send Data"
-            android:onClick="sendMsgButtonClicked"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Round trip time:"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/msgTimeText"
-            android:text=" waiting..."/>
-    </LinearLayout>
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Round trip time:"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/msgTimeText"
+                android:text=" waiting..."/>
+        </LinearLayout>
         <View android:layout_width="match_parent"
             android:layout_height="12dp"
             android:background="@android:color/white"/>
-    <View android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@android:color/darker_gray"/>
+        <View android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/darker_gray"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Intent Service"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Intent Service"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -88,13 +88,59 @@
                 android:text=" waiting..."/>
         </LinearLayout>
         <View android:layout_width="match_parent"
-            android:layout_height="12dp"
-            android:background="@android:color/white"/>
+                android:layout_height="12dp"
+                android:background="@android:color/white"/>
         <View android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="@android:color/darker_gray"/>
 
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shared Memory"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/shmemCallButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Setup Shmem"
+                android:onClick="setupShmemButtonClicked"/>
+
+            <Button
+                android:id="@+id/shmemSendButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send Data Shmem"
+                android:onClick="sendShmemButtonClicked"/>
+
+
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Round trip time:"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/shmemTimeText"
+                android:text=" waiting..."/>
+        </LinearLayout>
+        <View android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:background="@android:color/white"/>
+        <View android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/darker_gray"/>
 
 
     </LinearLayout>
