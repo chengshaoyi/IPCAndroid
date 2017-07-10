@@ -5,4 +5,5 @@ package com.numericcal.serviceprovider;
 
 interface ShmemInterface {
     ParcelFileDescriptor getFD(String name, int numPages);
+    int informMessageSend(int ind);
 }

@@ -34,4 +34,10 @@ extern "C"
         env->GetIntArrayRegion (imgByteArr, 0, len, map);
 
     }
+    jint Java_com_numericcal_serviceuser_MainActivity_getPageSize(JNIEnv *env, jobject)
+    {
+
+        return PAGE_SIZE;
+
+    }
 }

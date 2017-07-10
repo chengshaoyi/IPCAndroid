@@ -1,12 +1,12 @@
 package com.numericcal.serviceuser;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.MemoryFile;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcel;
@@ -15,22 +15,19 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.numericcal.serviceprovider.ShmemInterface;
 
-import java.io.IOException;
-
+// extends service to receive response
 public class MainActivity extends AppCompatActivity {
     private final String pixelKey= "pixels";
     private final String rrKey= "resultReceiver";
     private boolean mBound=false;
     private Messenger serviceMessenger = null;
     long msgTimeLog;
-    long intServTimeLog;
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -91,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     //----------------- end of message based ----------------------------//
+    long intServTimeLog;
+
     public class MyResultReceiver extends ResultReceiver{
 
         public MyResultReceiver(Handler handler)
@@ -133,16 +132,35 @@ public class MainActivity extends AppCompatActivity {
 
 
     //-------------- end of intentService based -----------------------//
-    ParcelFileDescriptor pfd;
 
+    ParcelFileDescriptor pfd;
+    long shmemTimeLog;
     static {
         System.loadLibrary("native-lib");
     }
     public native void shmemInit(int fd, int numPages);
     public native void shmemSend(int[] data);
+    public native int getPageSize();
+
+
+
+
     public void sendShmemButtonClicked(View view)
     {
+        shmemTimeLog = System.currentTimeMillis();
         shmemSend(dataToSend);
+        int rtVal = -1;
+        try {
+            // check the data item seen on the other end
+            // just to make sure it is written
+            rtVal = remoteShmem.informMessageSend(0);
+        }catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        shmemTimeLog = System.currentTimeMillis() - shmemTimeLog;
+        View timeView = findViewById(R.id.shmemTimeText);
+        ((TextView)timeView).setText(""+(shmemTimeLog /1.0f)+" ms "+"and check result is "+rtVal);
+
     }
 
     public void setupShmemButtonClicked(View view)
@@ -157,14 +175,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             remoteShmem = ShmemInterface.Stub.asInterface(service);
-
-
+            int pageSize = getPageSize();
             try {
-                int numPages = numWord*4/4096+1;
+                int numPages = numWord*4/pageSize+1;
 
                 pfd = remoteShmem.getFD("abc",numPages);
                 shmemInit(pfd.getFd(),numPages);
                 Toast.makeText(getApplicationContext(),"shmem connected "+numPages, Toast.LENGTH_SHORT).show();
+
 
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -197,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         dataToSend = new int[numWord];
         for(int i=0; i<numWord;i++)
         {
-            dataToSend[i] = 1;
+            dataToSend[i] = i;
         }
         // shared memory stuff
 
@@ -209,5 +227,7 @@ public class MainActivity extends AppCompatActivity {
         if(mBound)
             unbindService(mConnection);
     }
+
+
 
 }
